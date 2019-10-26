@@ -46,7 +46,12 @@ reddit = praw.Reddit(client_id=clientid,
                      user_agent='rwallpapers')
 
 # choose between multiple subreddits
-reddittopic = random.choice(['wallpaper', 'wallpapers'])
+redditlist = ['wallpaper', 'wallpapers']
+
+if monitors == 2:
+    redditlist.append('multiwall')
+
+reddittopic = random.choice(redditlist)
 subreddit = reddit.subreddit(reddittopic)
 
 submissions = subreddit.top(time_filter='week', limit=100)
@@ -56,10 +61,16 @@ wallpaperurl = False
 primarylist = []
 
 for i in submissions:
-    if '1920' in i.title and \
-            '1080' in i.title:
-        primarylist.append(i)
-        print('1080p picture found')
+    if reddittopic == 'multiwall':
+        if '3840' in i.title and \
+                '1080' in i.title:
+            primarylist.append(i)
+            print('1080p picture found')
+    else:
+        if '1920' in i.title and \
+                '1080' in i.title:
+            primarylist.append(i)
+            print('1080p picture found')
 
 
 def getwallpaper(sublist):
@@ -88,15 +99,25 @@ def getwallpaper(sublist):
             request.urlretrieve(url, './wallpaper.png')
         height, width, _ = cv2.imread(checkpicture).shape
         ratio = width / height
-        if ratio <= 1.8 and ratio >= 1.7:
-            print('found wallpaper')
-            if os.path.exists('wallpaper.bak'):
-                os.remove('wallpaper.bak')
-            return True
+        if not reddittopic == 'multiwall':
+            if ratio <= 1.8 and ratio >= 1.7:
+                print('found wallpaper')
+                if os.path.exists('wallpaper.bak'):
+                    os.remove('wallpaper.bak')
+                return True
+        else:
+            if ratio <= 3.5 and ratio >= 3.6:
+                print('found dual monitor wallpaper')
+                if os.path.exists('wallpaper.bak'):
+                    os.remove('wallpaper.bak')
+                return True
     return False
 
 
 if not getwallpaper(primarylist):
     getwallpaper(submissions)
+
+if reddittopic == 'multiwall':
+    os.system('feh --bg-scale --no-xinerama ~/paperbenni' + checkpicture)
 
 os.system('feh --bg-scale ~/paperbenni/' + checkpicture)
