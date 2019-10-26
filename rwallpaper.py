@@ -1,10 +1,25 @@
+#!/usr/bin/env python3
+
+#########################################################
+## fetch and set top 1080p wallpaper from r/wallpapers ##
+#########################################################
+
+from urllib import request
 import cv2
 import time
 from urllib.parse import urlparse
 import wget
 import os
 import praw
-from urllib import request
+import random
+import subprocess
+
+monitors = int(subprocess.Popen
+               ('xrandr | egrep "[^s]connected" | wc -l',
+                shell=True, stdout=subprocess.PIPE).communicate()[0])
+
+
+print('wallpaper changer started')
 
 checkpicture = ''
 
@@ -30,8 +45,9 @@ reddit = praw.Reddit(client_id=clientid,
                      client_secret=clientsecret,
                      user_agent='rwallpapers')
 
-
-subreddit = reddit.subreddit('wallpapers')
+# choose between multiple subreddits
+reddittopic = random.choice(['wallpaper', 'wallpapers'])
+subreddit = reddit.subreddit(reddittopic)
 
 submissions = subreddit.top(time_filter='week', limit=100)
 
