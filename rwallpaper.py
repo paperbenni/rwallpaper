@@ -13,6 +13,7 @@ import os
 import praw
 import random
 import subprocess
+import re
 
 monitors = int(subprocess.Popen
                ('xrandr | egrep "[^s]connected" | wc -l',
@@ -93,10 +94,15 @@ def getwallpaper(sublist):
             print('jpg image')
             checkpicture = 'wallpaper.jpg'
             request.urlretrieve(url, './wallpaper.jpg')
-        if ending == '.png':
+        elif ending == '.png':
             print('png image')
             checkpicture = 'wallpaper.png'
             request.urlretrieve(url, './wallpaper.png')
+        elif re.compile('https://imgur.com/a/.*').match(url):
+            scriptpath = os.path.dirname(os.path.realpath(__file__))
+            os.system('bash ' + scriptpath + '/imgur.sh ' + url)
+            checkpicture = 'wallpaper.png'
+            
         height, width, _ = cv2.imread(checkpicture).shape
         ratio = width / height
         if not reddittopic == 'multiwall':
