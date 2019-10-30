@@ -14,11 +14,24 @@ import praw
 import random
 import subprocess
 import re
+import os
+import sys
 
+
+# get amount of monitors
 monitors = int(subprocess.Popen
                ('xrandr | egrep "[^s]connected" | wc -l',
                 shell=True, stdout=subprocess.PIPE).communicate()[0])
 
+# only argument as topic if present
+if type(sys.argv[1]) == str:
+    print('chose argument reddit')
+    redditlist = [sys.argv[1]]
+else:
+    # choose between multiple subreddits
+    redditlist = ['wallpaper', 'wallpapers', 'wallpaperdump']
+    if monitors == 2:
+        redditlist.append('multiwall')
 
 print('wallpaper changer started')
 
@@ -46,11 +59,6 @@ reddit = praw.Reddit(client_id=clientid,
                      client_secret=clientsecret,
                      user_agent='rwallpapers')
 
-# choose between multiple subreddits
-redditlist = ['wallpaper', 'wallpapers']
-
-if monitors == 2:
-    redditlist.append('multiwall')
 
 reddittopic = random.choice(redditlist)
 subreddit = reddit.subreddit(reddittopic)
@@ -102,7 +110,7 @@ def getwallpaper(sublist):
             scriptpath = os.path.dirname(os.path.realpath(__file__))
             os.system('bash ' + scriptpath + '/imgur.sh ' + url)
             checkpicture = 'wallpaper.png'
-            
+
         height, width, _ = cv2.imread(checkpicture).shape
         ratio = width / height
         if not reddittopic == 'multiwall':
